@@ -37,7 +37,7 @@ Antes de comenzar, asegúrate de tener instalados los siguientes elementos:
 1️⃣ **Clonar el repositorio**:
 
 ```bash
-git clone https://github.com/tu-usuario/tm-task-manager-web-ui.git
+git clone https://github.com/EmersonUrielVargas/tm-task-manager-mngr.git
 cd tm-task-manager-web-ui
 ```
 2️⃣ **Restaurar los paquetes:**:
