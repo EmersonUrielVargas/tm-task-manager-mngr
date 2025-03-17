@@ -27,6 +27,11 @@ namespace tm_task_manager_mngr
 
             app.UseAuthorization();
 
+            app.MapGet("/", async context =>
+            {
+                context.Response.Redirect("/swagger/index.html");
+            });
+
             app.MapControllers();
 
             app.Run();
