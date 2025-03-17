@@ -1,0 +1,6 @@
+@tm_task_manager_mngr_HostAddress = http://localhost:5124
+
+GET {{tm_task_manager_mngr_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
