@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using tm_task_manager_mngr.Data;
-using Task = tm_task_manager_mngr.Data.Task;
+using tm_task_manager_mngr.Dto;
+using tm_task_manager_mngr.Models;
+using Task = tm_task_manager_mngr.Models.Task;
 
 namespace tm_task_manager_mngr.Controllers
 {
@@ -21,14 +23,12 @@ namespace tm_task_manager_mngr.Controllers
             _context = context;
         }
 
-        // GET: api/Tasks
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Task>>> GetTasks()
         {
             return await _context.Tasks.ToListAsync();
         }
 
-        // GET: api/Tasks/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Task>> GetTask(string id)
         {
@@ -36,45 +36,41 @@ namespace tm_task_manager_mngr.Controllers
 
             if (task == null)
             {
-                return NotFound();
+                return NotFound(new ErrorResponse("Task not Found"));
             }
 
             return task;
         }
 
-        // PUT: api/Tasks/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTask(string id, Task task)
+        public async Task<IActionResult> PutTask(string id, TaskDto task)
         {
-            if (id != task.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(task).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                var taskInBd = await _context.Tasks.FindAsync(id);
+                if (taskInBd == null)
+                {
+                    return NotFound(new ErrorResponse("Task not Found"));
+                }else{
+
+                    var taskUpdated = taskInBd;
+                    taskUpdated.Title = StringNullDefault(task.Title, taskInBd.Title);
+                    taskUpdated.Description = StringNullDefault(task.Description, taskInBd.Description);
+                    taskUpdated.Status = StringNullDefault(task.Status, taskInBd.Status);
+                    _context.Entry(taskUpdated).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TaskExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/Tasks
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
         [HttpPost]
         public async Task<ActionResult<Task>> PostTask(Task task)
         {
@@ -98,14 +94,14 @@ namespace tm_task_manager_mngr.Controllers
             return CreatedAtAction("GetTask", new { id = task.Id }, task);
         }
 
-        // DELETE: api/Tasks/5
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(string id)
         {
             var task = await _context.Tasks.FindAsync(id);
             if (task == null)
             {
-                return NotFound();
+                return NotFound(new ErrorResponse("Task not Found"));
             }
 
             _context.Tasks.Remove(task);
@@ -117,6 +113,11 @@ namespace tm_task_manager_mngr.Controllers
         private bool TaskExists(string id)
         {
             return _context.Tasks.Any(e => e.Id == id);
+        }
+
+        private string StringNullDefault(string validateText, string defaultText)
+        {
+            return string.IsNullOrEmpty(validateText)? defaultText: validateText;
         }
     }
 }
