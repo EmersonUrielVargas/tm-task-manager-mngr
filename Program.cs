@@ -34,6 +34,12 @@ namespace tm_task_manager_mngr
 
             app.MapControllers();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                dbContext.Database.EnsureCreated();
+            }
+
             app.Run();
         }
     }
